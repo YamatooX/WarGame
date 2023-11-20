@@ -10,7 +10,7 @@ namespace WarGame.models
     public class General : IGeneral
     {
         public string Name { get; set; }
-        public IEnumerable<Soldier> Army;
+        public IList<Soldier> Army { get; set; }
         public int gold;
 
         public General(string name) 
@@ -26,20 +26,63 @@ namespace WarGame.models
             return damageOutput;
         }
 
-        // Think about and attack functionality with choosing which Soldiers attack
-
         public void BuySoldier()
         {
             Console.Write("Pick a soldier to buy, General: ");
-            // Buying mechanics
+            string option = Console.ReadLine();
+            PrintBuyingOptions();
+
+            switch (option)
+            {
+                case "1":
+                    BuySoldier(new Private());
+                    break;
+                case "2":
+                    BuySoldier(new Corporal());
+                    break;
+                case "3":
+                    BuySoldier(new Captain());
+                    break;
+                case "4":
+                    BuySoldier(new Mayor());
+                    break;
+                default:
+                    Logger.Log("Chosen wrong option");
+                    break;
+            }
+        }        
+
+        public void Maneuveres()
+        {
+            PromoteSoldiers();
         }
 
-        public void PromoteSoldiers()
+        private void PromoteSoldiers()
         {
-            foreach(Soldier soldier in Army)
+            for (int i = 0; i < Army.Count; i++)
             {
-                soldier.Experience++;
+                Army[i].Experience++;
+                if (CheckPromotions(Army[i]))
+                {
+                    PromoteSoldier(Army[i]);
+                    Army.RemoveAt(i);
+                }
             }
+        }
+
+        private Soldier? PromoteSoldier(Soldier soldier)
+        {
+            Rank rank = soldier.Rank;
+            switch (rank)
+            {
+                case Rank.Private:
+                    return new Corporal();
+                case Rank.Corporal:
+                    return new Captain();
+                case Rank.Captain:
+                    return new Mayor();
+            }
+            return null;
         }
 
         private int FullPower()
@@ -50,6 +93,51 @@ namespace WarGame.models
                 power += soldier.Strength;
             }
             return power;
+        }
+
+        private bool CheckPromotions(Soldier soldier)
+        {
+            if (soldier.Experience < 5 && soldier.Rank != Rank.Mayor )
+                return false;
+            return true;
+        }
+
+        private void AddSoldier(Soldier soldier)
+        {
+            Logger.Log($"{soldier.Rank} bought");
+            Army.Add(soldier);
+        }
+
+        private void BuySoldier(Soldier soldier)
+        {
+            if(!IsSoldierAffordable(soldier)) 
+            {
+                Logger.Log($"Cannot buy {soldier.Rank}");
+            }
+            AddSoldier(soldier);             
+        }
+
+        private bool IsSoldierAffordable(Soldier soldier)
+        {
+            if (soldier.Cost > gold)
+            {
+                Logger.Log($"Cannot buy {soldier.Rank}");
+                return false;
+            }
+            return true;
+        }
+
+        private void PrintBuyingOptions()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine(" [1] Buy Private");
+            sb.AppendLine(" [2] Buy Corporal");
+            sb.AppendLine(" [3] Buy Captain");
+            sb.AppendLine(" [4] Buy Mayor");
+            sb.AppendLine(" Press any key to get back");
+
+            Console.WriteLine(sb.ToString());
         }
     }
 }

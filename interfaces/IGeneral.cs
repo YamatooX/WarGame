@@ -10,7 +10,6 @@ namespace WarGame.interfaces
     {
         public void BuySoldier();
         public int Attack();
-        public void PromoteSoldiers();
-
+        public void Maneuveres();
     }
 }
