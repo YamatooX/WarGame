@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using WarGame.interfaces;
 
 namespace WarGame.models
@@ -22,7 +18,14 @@ namespace WarGame.models
 
         public int Attack()
         {
+            if (!Army.Any())
+            {
+                return 0;
+            }
+
             int damageOutput = FullPower();
+            Logger.Log($"Genral {Name} {damageOutput} damage dealt");
+
             return damageOutput;
         }
 
@@ -55,6 +58,16 @@ namespace WarGame.models
         public void Maneuveres()
         {
             PromoteSoldiers();
+            Logger.Log($"General {Name} has started maneuvers. All soldiers has their Exp risen");
+        }
+        public int FullPower()
+        {
+            int power = 0;
+            foreach (Soldier soldier in Army)
+            {
+                power += soldier.Strength;
+            }
+            return power;
         }
 
         private void PromoteSoldiers()
@@ -85,16 +98,6 @@ namespace WarGame.models
             return null;
         }
 
-        private int FullPower()
-        {
-            int power = 0;
-            foreach(Soldier soldier in Army)
-            {
-                power += soldier.Strength;
-            }
-            return power;
-        }
-
         private bool CheckPromotions(Soldier soldier)
         {
             if (soldier.Experience < 5 && soldier.Rank != Rank.Mayor )
@@ -114,7 +117,8 @@ namespace WarGame.models
             {
                 Logger.Log($"Cannot buy {soldier.Rank}");
             }
-            AddSoldier(soldier);             
+            AddSoldier(soldier);
+            gold -= soldier.Cost;
         }
 
         private bool IsSoldierAffordable(Soldier soldier)

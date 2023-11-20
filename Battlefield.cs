@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WarGame.interfaces;
+﻿using System.Text;
 using WarGame.models;
 
 namespace WarGame
@@ -30,18 +25,14 @@ namespace WarGame
 
         private void StartBattle(General general1, General general2)
         {
-            // machanics for battle
-            // 1 action for general per turn
-            // terms of battle end
             int roundCounter = 0;
 
             do
             {
-                // General 1 turn
-                
+                GeneralsTurn(general1);
+                GeneralsTurn(general2);
 
-                //General 2 turn
-
+                roundCounter++;
             } while (true);
         }
 
@@ -53,6 +44,7 @@ namespace WarGame
             sb.AppendLine(" [1] Attack");
             sb.AppendLine(" [2] Do a Maneuvres");
             sb.AppendLine(" [3] Buy a Soldier");
+            sb.AppendLine(" [4] Check my power");
 
             Console.WriteLine(sb.ToString());
         }
@@ -61,9 +53,31 @@ namespace WarGame
         {
             bool roundCheck = false;
             do
-            {                
+            {
                 PrintActionOptions(general);
-                roundCheck = true;
+                string option = Console.ReadLine();
+
+                switch (option)
+                {
+                    case "1": 
+                        general.Attack();
+                        roundCheck = true;
+                        break;
+                    case "2":
+                        general.Maneuveres();
+                        roundCheck = true;
+                        break;
+                    case "3":
+                        general.BuySoldier();
+                        roundCheck = true;
+                        break;
+                    case "4":
+                        Console.WriteLine(general.FullPower());
+                        break;
+                    default:
+                        Console.WriteLine("Choose an option");
+                        break;
+                }
 
             } while (roundCheck == false);
         }
