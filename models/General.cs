@@ -7,13 +7,15 @@ namespace WarGame.models
     {
         public string Name { get; set; }
         public IList<Soldier> Army { get; set; }
-        public int gold;
+        public int Gold;
+        public int FullHealth;
 
         public General(string name) 
         {
             Name = name;
             Army = new List<Soldier>();
-            gold = 50;
+            Gold = 50;
+            FullHealth = GetFullHealth();
         }
 
         public int Attack()
@@ -24,16 +26,16 @@ namespace WarGame.models
             }
 
             int damageOutput = FullPower();
-            Logger.Log($"Genral {Name} {damageOutput} damage dealt");
+            Logger.Log($"General {Name} dealt {damageOutput} damage");
 
             return damageOutput;
         }
 
         public void BuySoldier()
         {
-            Console.Write("Pick a soldier to buy, General: ");
-            string option = Console.ReadLine();
+            Console.WriteLine("Pick a soldier to buy, General: ");
             PrintBuyingOptions();
+            string option = Console.ReadLine();
 
             switch (option)
             {
@@ -55,6 +57,23 @@ namespace WarGame.models
             }
         }        
 
+        public void TakeDamage(General general, int amount)
+        {
+            FullHealth -= amount;
+            KillSoldiers(general.Army, FullPower());
+        }
+
+        public int GetFullHealth()
+        {
+            int hp = 0;
+            foreach (Soldier soldier in Army)
+            {
+                hp += soldier.HealthPoints;
+            }
+
+            return hp;
+        }
+
         public void Maneuveres()
         {
             PromoteSoldiers();
@@ -62,12 +81,36 @@ namespace WarGame.models
         }
         public int FullPower()
         {
+            if (!Army.Any())
+                return 0;
+
             int power = 0;
             foreach (Soldier soldier in Army)
             {
                 power += soldier.Strength;
             }
             return power;
+        }
+
+        private void KillSoldiers(IList<Soldier> opponentsArmy, int damageTaken)
+        {
+            if (!opponentsArmy.Any())
+                return;
+
+            int damageToDeal = damageTaken;
+            for (int i = opponentsArmy.Count; i <= 0; i--)
+            {
+                if (damageToDeal >= opponentsArmy[i].HealthPoints)
+                {
+                    opponentsArmy.RemoveAt(i);
+                    damageToDeal -= opponentsArmy[i].HealthPoints;
+                }
+                else
+                {
+                    opponentsArmy[i].HealthPoints =- damageToDeal;
+                    break;
+                }
+            }
         }
 
         private void PromoteSoldiers()
@@ -118,12 +161,12 @@ namespace WarGame.models
                 Logger.Log($"Cannot buy {soldier.Rank}");
             }
             AddSoldier(soldier);
-            gold -= soldier.Cost;
+            Gold -= soldier.Cost;
         }
 
         private bool IsSoldierAffordable(Soldier soldier)
         {
-            if (soldier.Cost > gold)
+            if (soldier.Cost > Gold)
             {
                 Logger.Log($"Cannot buy {soldier.Rank}");
                 return false;

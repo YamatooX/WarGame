@@ -12,7 +12,7 @@ namespace WarGame
 
         public void CreateBattlefield() 
         {
-            // For test purposes names are hardcoded
+            // For faster test purposes names are hardcoded
 
             string gen1Name = "Jarek";
             string gen2Name = "Remik";
@@ -29,11 +29,18 @@ namespace WarGame
 
             do
             {
-                GeneralsTurn(general1);
-                GeneralsTurn(general2);
+                GeneralsTurn(general1, general2);
+                if (general2.FullHealth < 0)
+                    break;
+                GeneralsTurn(general2, general1);
 
                 roundCounter++;
-            } while (true);
+            } while (general1.FullHealth <= 1 || general2.FullHealth <= 1);
+
+            if (general1.FullHealth < 1)
+                Logger.Log($"{general2} has won");
+            else
+                Logger.Log($"{general1} has won");
         }
 
         private void PrintActionOptions(General general)
@@ -49,7 +56,7 @@ namespace WarGame
             Console.WriteLine(sb.ToString());
         }
 
-        private void GeneralsTurn(General general)
+        private void GeneralsTurn(General general, General opponent)
         {
             bool roundCheck = false;
             do
@@ -61,6 +68,7 @@ namespace WarGame
                 {
                     case "1": 
                         general.Attack();
+                        opponent.TakeDamage(opponent, general.FullPower());
                         roundCheck = true;
                         break;
                     case "2":
